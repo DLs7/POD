@@ -10,6 +10,15 @@ void intToChar (int number, char *fileName);
 void randomFile (char *fileName, int size);
 int createWays (int range, int numberWays, char *randomNumbersFileName);
 int createWay (int *iteration, int index, int range, int numberWays, char *randomNumbersFileName);
+void sortFile (char *fileName);
+int sizeFile (char *fileName);
+int* createArrayFromFile (char *fileName, int size);
+void sortArray (int *array, int size);
+void concatFiles (char *fileName1, char *fileName2);
+void kWays (int numberWays);
+void createFileFromArray (char *fileName, int *array, int size);
+void removeFirstElementFile (char *fileName);
+int getLesserValue (int *array, int size);
 
 // Error handling messages
 void errorMessage (int errorCode)
@@ -132,21 +141,16 @@ int createWay (int *iteration, int index, int range, int numberWays, char *rando
     char fileName[11] = {'w', 'a', 'y', '0', '0', '0', '.', 't', 'x', 't', '\0'};
     intToChar(index, fileName);
 
-    printf("%s\n", fileName);
-
     FILE *auxWay = fopen ("auxWay.txt", "w");
     FILE *way = fopen (fileName, "r+");
     FILE *randomNumbers = fopen(randomNumbersFileName, "r");    
 
     int filePosition = *iteration;
     fseek (randomNumbers, filePosition, SEEK_SET);
-    
-    printf("Initial position = %d\n", filePosition);
 
     int number = *iteration;
     int rNumber;
     for (int i = 0; i<range; i++) {
-        printf("Pos = %d ", number); 
         fscanf(randomNumbers, "%d", &rNumber);
         
         if (rNumber == -1) break;
@@ -156,27 +160,175 @@ int createWay (int *iteration, int index, int range, int numberWays, char *rando
         number+=2;
         if (rNumber > 9) number+=1;
         if (rNumber > 99) number+=1;
-
-        printf("Number = %d\n", rNumber);
     }
 
-    
     *iteration = number;
 
-    if (rNumber == -1) return -1;
+    fclose(auxWay);
+    
+    sortFile("auxWay.txt");
+
     fclose(way);
     fclose(randomNumbers);
 
+    concatFiles(fileName, "auxWay.txt");
+
+    if (rNumber == -1) return -1;
     return 1;
+}
+
+void sortFile (char *fileName)
+{
+    int size = sizeFile(fileName);
+    int *array = createArrayFromFile(fileName, size);
+    sortArray(array, size);
+
+    FILE *file = fopen (fileName, "w");
+    for (int i = 0; i<size; i++) {
+        fprintf(file, "%d ", array[i]);
+    }
+
+    fclose(file);
+}
+
+int* createArrayFromFile (char *fileName, int size)
+{
+    FILE *file = fopen (fileName, "r");
+
+    int *aux = malloc(size);
+
+    for (int i = 0; i<size; i++) {
+        fscanf(file, "%d", &aux[i]);
+    }
+
+    fclose(file);
+    return aux;
+}
+
+void sortArray (int *array, int size)
+{
+    for (int i = 1; i < size; i++) {
+        int chave = array[i];
+        int j = i-1;
+        while ( (j >= 0) && (chave < array[j]) ) {
+            array[j+1] = array[j];
+            j--;
+        }
+        array[j+1] = chave;  
+    }
+}
+
+int sizeFile (char *fileName) 
+{
+    FILE *file = fopen (fileName, "r");
+    int n;
+    int size = 0;
+
+    while (fscanf(file, "%d", &n) == 1) size++;
+    
+    return size;
+}
+
+void concatFiles (char *fileName1, char *fileName2)
+{
+    FILE *f1 = fopen (fileName1, "r+");
+    FILE *f2 = fopen (fileName2, "r");
+
+    fseek(f1, 0, SEEK_END);
+
+    int n;
+    while (fscanf(f2, "%d", &n) == 1) {
+        fprintf(f1, "%d ", n);
+    }
+
+    fclose(f1);
+    fclose(f2);
+}
+
+void kWays (int numberWays) 
+{
+    int buffer[numberWays];
+
+    for (int i = 0; i<numberWays; i++) {
+        char fileName[11] = {'w', 'a', 'y', '0', '0', '0', '.', 't', 'x', 't', '\0'};
+        intToChar(i, fileName);
+
+        FILE *way = fopen (fileName, "r");
+
+        fscanf(way, "%d", &buffer[i]);
+
+        fclose(way);
+
+        removeFirstElementFile(fileName);
+    } 
+
+    printf("Tico: %d\n", getLesserValue(buffer, numberWays));
+
+    for (int i = 0; i<numberWays; i++) {
+        printf("%d ", buffer[i]);
+    }
+
+    printf("\n");
+
+    createFileFromArray("buffer.txt", buffer, numberWays);
+}
+
+int getLesserValue (int *array, int size)
+{
+    int aux[size];
+
+    for (int i = 0; i<size; i++) {
+        aux[i] = array[i];
+    }
+    
+    sortArray(aux, size);
+
+    return aux[0];
+}
+
+
+void createFileFromArray (char *fileName, int *array, int size)
+{
+    FILE *file = fopen (fileName, "w");
+
+    for (int i = 0; i<size; i++) {
+        fprintf(file, "%d ", array[i]);
+    }
+
+    fclose(file);
+}
+
+void removeFirstElementFile (char *fileName)
+{
+    FILE *file = fopen (fileName, "r");
+    FILE *fileAux = fopen ("temp.txt", "w");
+
+    int n;
+    fscanf(file, "%d", &n);
+    while (fscanf(file, "%d", &n) == 1) fprintf(fileAux, "%d ", n);
+
+    fclose(file);
+    fclose(fileAux);
+
+    file = fopen (fileName, "w");
+    fileAux = fopen ("temp.txt", "r");
+
+    while (fscanf(fileAux, "%d", &n) == 1) fprintf(file, "%d ", n);
+
+    fclose(file);
+    fclose(fileAux);
+
+    remove("temp.txt");
 }
 
 int main ()
 {
     srand(time(NULL));
-    int range = 5;
+    int range = 3;
     int numberWays = 3;
     randomFile("randomNumbers.txt", 16);
-    createWays(range, numberWays, "randomNumbers.txt");
+    createWays(range, numberWays, "testFile.txt");
+    kWays(numberWays);
 
     return 1;
 }
