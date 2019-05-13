@@ -95,6 +95,8 @@ void randomFile (char *fileName, int size)
         fprintf(file, "%d ", n);
     }
 
+    fprintf(file, "%d", -1);
+
     fclose(file);
 
     return;
@@ -105,13 +107,23 @@ int createWays (int range, int numberWays, char *randomNumbersFileName)
     createFiles(numberWays);
     int iteration = 0;
 
-    for (int i = 0; i<numberWays; i++) {
-        int j = 0;
-        while (j < numberWays) {
-            createWay(&iteration, j, range, numberWays, randomNumbersFileName); 
-            j++;
+    int i = 0;
+    int j = 0;
+    int endOfFile;
+
+    while (endOfFile != -1) {
+        j = 0;
+        
+        if (i == numberWays) {
+            i = 0;
         }
         
+        while (endOfFile != -1 && j < numberWays) {
+            endOfFile = createWay(&iteration, j, range, numberWays, randomNumbersFileName);
+            j++;
+        }
+
+        i++;
     }
 }
 
@@ -122,20 +134,35 @@ int createWay (int *iteration, int index, int range, int numberWays, char *rando
 
     printf("%s\n", fileName);
     FILE *way = fopen (fileName, "w");
-    FILE *randomNumbers = fopen(randomNumbersFileName, "r");
+    FILE *randomNumbers = fopen(randomNumbersFileName, "r");    
 
-    fseek (randomNumbers, *iteration, SEEK_SET);
+    int filePosition = *iteration;
+    fseek (randomNumbers, filePosition, SEEK_SET);
+    
+    printf("Initial position = %d\n", filePosition);
 
     int number = *iteration;
-    for (int i = 0; i<range; i++, number++) {
-        int rNumber;
+    int rNumber;
+    for (int i = 0; i<range; i++) {
+        printf("Pos = %d ", number); 
         fscanf(randomNumbers, "%d", &rNumber);
-        printf("%d\n", rNumber);
+        fprintf(way, "%d ", rNumber);
+
+        if (rNumber == -1) return -1;
+
+        number+=2;
+        if (rNumber > 9) number+=1;
+        if (rNumber > 99) number+=1;
+
+        printf("Number = %d\n", rNumber);
     }
 
     *iteration = number;
+
     fclose(way);
     fclose(randomNumbers);
+
+    return 1;
 }
 
 int main ()
