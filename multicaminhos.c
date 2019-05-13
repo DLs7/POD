@@ -7,7 +7,9 @@ void errorMessage (int errorCode);
 int createFile (char *fileName);
 int createFiles (int numberFiles);
 void intToChar (int number, char *fileName);
-void randomFile (char *fileName, int size); 
+void randomFile (char *fileName, int size);
+int createWays (int range, int numberWays, char *randomNumbersFileName);
+int createWay (int *iteration, int index, int range, int numberWays, char *randomNumbersFileName);
 
 // Error handling messages
 void errorMessage (int errorCode)
@@ -98,11 +100,51 @@ void randomFile (char *fileName, int size)
     return;
 }
 
+int createWays (int range, int numberWays, char *randomNumbersFileName)
+{
+    createFiles(numberWays);
+    int iteration = 0;
+
+    for (int i = 0; i<numberWays; i++) {
+        int j = 0;
+        while (j < numberWays) {
+            createWay(&iteration, j, range, numberWays, randomNumbersFileName); 
+            j++;
+        }
+        
+    }
+}
+
+int createWay (int *iteration, int index, int range, int numberWays, char *randomNumbersFileName)
+{
+    char fileName[11] = {'w', 'a', 'y', '0', '0', '0', '.', 't', 'x', 't', '\0'};
+    intToChar(index, fileName);
+
+    printf("%s\n", fileName);
+    FILE *way = fopen (fileName, "w");
+    FILE *randomNumbers = fopen(randomNumbersFileName, "r");
+
+    fseek (randomNumbers, *iteration, SEEK_SET);
+
+    int number = *iteration;
+    for (int i = 0; i<range; i++, number++) {
+        int rNumber;
+        fscanf(randomNumbers, "%d", &rNumber);
+        printf("%d\n", rNumber);
+    }
+
+    *iteration = number;
+    fclose(way);
+    fclose(randomNumbers);
+}
+
 int main ()
 {
-    int numberWays = 10;
-    randomFile("randomNumbers.txt", 100);
-    createFiles(numberWays);
+    srand(time(NULL));
+    int range = 5;
+    int numberWays = 3;
+    randomFile("randomNumbers.txt", 16);
+    createWays(range, numberWays, "randomNumbers.txt");
 
     return 1;
 }
