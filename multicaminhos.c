@@ -133,8 +133,10 @@ int createWay (int *iteration, int index, int range, int numberWays, char *rando
     intToChar(index, fileName);
 
     printf("%s\n", fileName);
-    FILE *way = fopen (fileName, "w");
+    FILE *way = fopen (fileName, "r+");
     FILE *randomNumbers = fopen(randomNumbersFileName, "r");    
+
+    fseek (way, 0, SEEK_END);
 
     int filePosition = *iteration;
     fseek (randomNumbers, filePosition, SEEK_SET);
@@ -146,7 +148,8 @@ int createWay (int *iteration, int index, int range, int numberWays, char *rando
     for (int i = 0; i<range; i++) {
         printf("Pos = %d ", number); 
         fscanf(randomNumbers, "%d", &rNumber);
-        fprintf(way, "%d ", rNumber);
+        if (rNumber != -1)
+            fprintf(way, "%d ", rNumber);
 
         if (rNumber == -1) return -1;
 
