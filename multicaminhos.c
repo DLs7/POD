@@ -275,15 +275,16 @@ void kWays (int numberWays)
 
 int getLesserValue (int *array, int size)
 {
-    int aux[size];
+    int lesser = 0;
 
     for (int i = 0; i<size; i++) {
-        aux[i] = array[i];
-    }
+        
+        if (array[i] < array[lesser])
+        	lesser = i;
     
-    sortArray(aux, size);
+    }
 
-    return aux[0];
+    return lesser;
 }
 
 
