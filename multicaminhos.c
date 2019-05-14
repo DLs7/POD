@@ -263,14 +263,13 @@ void kWays (int numberWays, char *fileName)
 
     kWays_(numberWays);
 
-
     FILE *file = fopen("sortedFile.txt", "w");
 
     for (int i = 0; i<numberWays; i++) {
         char fileName[11] = {'w', 'a', 'y', '0', '0', '0', '.', 't', 'x', 't', '\0'};
         intToChar(i, fileName);
-        removeMinus2(fileName);
         concatFiles("sortedFile.txt", fileName);
+        removeMinus2("sortedFile.txt");
     }
 }
 
@@ -359,16 +358,6 @@ void createNewWay (int *buffer, char *fileName, int numberWays, int *lastWay)
     int cont = 0;
 
     for (int i = 0; i<numberWays*RAM; i++) {
-        if (cont == RAM) {
-            FILE *aux = fopen("temp.txt", "w");
-            intToChar(*lastWay, fileName);
-            fprintf(aux, "%d ", -2);
-            fclose(aux);
-            concatFiles(fileName, "temp.txt");
-            remove("temp.txt");
-            cont = 0;
-        }
-
         cont++;
 
         intToChar(*lastWay, fileName);
@@ -465,7 +454,7 @@ int main ()
 {
     srand(time(NULL));
     int numberWays = 3;
-    char* fileName = "randomNumbers.txt";
+    char* fileName = "testFile.txt";
 
     randomFile("randomNumbers.txt", 22);
     createWays(numberWays, fileName);
