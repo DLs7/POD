@@ -8,17 +8,25 @@ int createFile (char *fileName);
 int createFiles (int numberFiles);
 void intToChar (int number, char *fileName);
 void randomFile (char *fileName, int size);
-int createWays (int range, int numberWays, char *randomNumbersFileName);
-int createWay (int *iteration, int index, int range, int numberWays, char *randomNumbersFileName);
+int createWays (int numberWays, char *randomNumbersFileName);
+int createWay (int *iteration, int index, int numberWays, char *randomNumbersFileName);
 void sortFile (char *fileName);
 int sizeFile (char *fileName);
 int* createArrayFromFile (char *fileName, int size);
 void sortArray (int *array, int size);
 void concatFiles (char *fileName1, char *fileName2);
-void kWays (int numberWays);
+void kWays_ (int numberWays);
 void createFileFromArray (char *fileName, int *array, int size);
 void removeFirstElementFile (char *fileName);
 int getLesserValue (int *array, int size);
+void initializeBuffer (int *buffer, int numberWays);
+void createNewWay (int *buffer, char *fileName, int numberWays, int *lastWay);
+void copyFiles (char *fileName1, char *fileName2);
+void kWays (int numberWays, char *fileName);
+void removeMinus2 (char* fileName);
+void addMinus2 (char *fileName);
+
+#define RAM 3
 
 // Error handling messages
 void errorMessage (int errorCode)
@@ -104,21 +112,19 @@ void randomFile (char *fileName, int size)
         fprintf(file, "%d ", n);
     }
 
-    fprintf(file, "%d", -1);
-
     fclose(file);
 
     return;
 }
 
-int createWays (int range, int numberWays, char *randomNumbersFileName)
+int createWays (int numberWays, char *randomNumbersFileName)
 {
     createFiles(numberWays);
     int iteration = 0;
+    int endOfFile;
 
     int i = 0;
     int j = 0;
-    int endOfFile;
 
     while (endOfFile != -1) {
         j = 0;
@@ -128,7 +134,7 @@ int createWays (int range, int numberWays, char *randomNumbersFileName)
         }
         
         while (endOfFile != -1 && j < numberWays) {
-            endOfFile = createWay(&iteration, j, range, numberWays, randomNumbersFileName);
+            endOfFile = createWay(&iteration, j, numberWays, randomNumbersFileName);
             j++;
         }
 
@@ -136,7 +142,7 @@ int createWays (int range, int numberWays, char *randomNumbersFileName)
     }
 }
 
-int createWay (int *iteration, int index, int range, int numberWays, char *randomNumbersFileName)
+int createWay (int *iteration, int index, int numberWays, char *randomNumbersFileName)
 {
     char fileName[11] = {'w', 'a', 'y', '0', '0', '0', '.', 't', 'x', 't', '\0'};
     intToChar(index, fileName);
@@ -150,8 +156,9 @@ int createWay (int *iteration, int index, int range, int numberWays, char *rando
 
     int number = *iteration;
     int rNumber;
-    for (int i = 0; i<range; i++) {
-        fscanf(randomNumbers, "%d", &rNumber);
+    for (int i = 0; i<RAM; i++) {
+        if (fscanf(randomNumbers, "%d", &rNumber) != 1) 
+            rNumber = -1;
         
         if (rNumber == -1) break;
         
@@ -167,6 +174,10 @@ int createWay (int *iteration, int index, int range, int numberWays, char *rando
     fclose(auxWay);
     
     sortFile("auxWay.txt");
+    auxWay = fopen ("auxWay.txt", "r+");
+    fseek(auxWay, 0, SEEK_END);
+    fprintf(auxWay, "%d ", -2);
+    fclose(auxWay);
 
     fclose(way);
     fclose(randomNumbers);
@@ -245,10 +256,146 @@ void concatFiles (char *fileName1, char *fileName2)
     fclose(f2);
 }
 
-void kWays (int numberWays) 
+void kWays (int numberWays, char *fileName)
 {
-    int buffer[numberWays];
+    int nExe = 0;
+    int fileSize = sizeFile(fileName);
 
+    kWays_(numberWays);
+
+
+    FILE *file = fopen("sortedFile.txt", "w");
+
+    for (int i = 0; i<numberWays; i++) {
+        char fileName[11] = {'w', 'a', 'y', '0', '0', '0', '.', 't', 'x', 't', '\0'};
+        intToChar(i, fileName);
+        removeMinus2(fileName);
+        concatFiles("sortedFile.txt", fileName);
+    }
+}
+
+void kWays_ (int numberWays) 
+{
+    int buffer[RAM];
+    char fileName[11] = {'w', 'a', 'y', '0', '0', '0', '.', 't', 'x', 't', '\0'};
+    int lastWay = numberWays;
+
+    for (int i = 0; i<numberWays; i++) {
+        initializeBuffer(buffer, RAM);
+        createNewWay(buffer, fileName, numberWays, &lastWay);
+    }
+
+    for (int i = 0; i < numberWays; i++) {
+        char fileNameAux[11] = {'w', 'a', 'y', '0', '0', '0', '.', 't', 'x', 't', '\0'};
+        intToChar(i, fileName);
+        intToChar(numberWays+i, fileNameAux);  
+        copyFiles(fileName, fileNameAux);
+    }
+
+}
+
+void copyFiles (char *fileName1, char *fileName2)
+{
+    int n;
+    FILE *f1 = fopen (fileName1, "w");
+    FILE *f2 = fopen (fileName2, "r");
+
+    while (fscanf(f2, "%d", &n) == 1) {
+        fprintf(f1, "%d ", n);
+    }
+
+    fclose(f1);
+    fclose(f2);
+}
+
+void removeMinus2 (char *fileName) 
+{
+    FILE* file    = fopen(fileName, "r");
+    FILE* fileAux = fopen("temp.txt", "w");
+
+    int n;
+
+    while (fscanf(file, "%d", &n) == 1) {
+        if (n != -2) {
+            fprintf(fileAux, "%d ", n);
+        }
+    }
+
+    fclose(file); fclose(fileAux);
+    copyFiles(fileName, "temp.txt");
+}
+
+void addMinus2 (char *fileName)
+{
+    FILE *file = fopen(fileName, "r");
+    FILE *fileAux = fopen("temp.txt", "w");
+
+    int n;
+    int count = 1;
+
+    while (fscanf(file, "%d", &n) == 1) {
+        fprintf(fileAux, "%d ", n);
+        
+        if (count == RAM) {
+            fprintf(fileAux, "-2 ", n);
+            count = 0;
+        }
+
+        count++;
+    }
+
+    fclose(file);
+    fclose(fileAux);
+    copyFiles(fileName, "temp.txt");
+    remove("temp.txt");
+}
+
+void createNewWay (int *buffer, char *fileName, int numberWays, int *lastWay)
+{
+    intToChar(*lastWay, fileName);
+    int lesserValue;
+
+    FILE *way = fopen (fileName, "w");
+    int cont = 0;
+
+    for (int i = 0; i<numberWays*RAM; i++) {
+        if (cont == RAM) {
+            FILE *aux = fopen("temp.txt", "w");
+            intToChar(*lastWay, fileName);
+            fprintf(aux, "%d ", -2);
+            fclose(aux);
+            concatFiles(fileName, "temp.txt");
+            remove("temp.txt");
+            cont = 0;
+        }
+
+        cont++;
+
+        intToChar(*lastWay, fileName);
+
+        lesserValue = getLesserValue(buffer, RAM);
+
+        FILE *way = fopen (fileName, "r+");
+        fseek(way, 0, SEEK_END);
+        fprintf(way, "%d ", buffer[lesserValue]);
+        fclose(way);
+
+        intToChar(lesserValue, fileName);
+
+        way = fopen (fileName, "r");
+        fscanf(way, "%d", &buffer[lesserValue]);
+        removeFirstElementFile(fileName);
+        fclose(way);
+    }
+
+    intToChar(*lastWay, fileName);
+    removeMinus2(fileName);
+    addMinus2(fileName);
+    (*lastWay)++;
+}
+
+void initializeBuffer (int *buffer, int numberWays)
+{   
     for (int i = 0; i<numberWays; i++) {
         char fileName[11] = {'w', 'a', 'y', '0', '0', '0', '.', 't', 'x', 't', '\0'};
         intToChar(i, fileName);
@@ -261,16 +408,6 @@ void kWays (int numberWays)
 
         removeFirstElementFile(fileName);
     } 
-
-    printf("Tico: %d\n", getLesserValue(buffer, numberWays));
-
-    for (int i = 0; i<numberWays; i++) {
-        printf("%d ", buffer[i]);
-    }
-
-    printf("\n");
-
-    createFileFromArray("buffer.txt", buffer, numberWays);
 }
 
 int getLesserValue (int *array, int size)
@@ -279,14 +416,16 @@ int getLesserValue (int *array, int size)
 
     for (int i = 0; i<size; i++) {
         
-        if (array[i] < array[lesser])
-        	lesser = i;
+        if (array[i] != -2) {
+            if (array[i] < array[lesser])
+        	    lesser = i;
+        } 
+
     
     }
 
     return lesser;
 }
-
 
 void createFileFromArray (char *fileName, int *array, int size)
 {
@@ -325,11 +464,12 @@ void removeFirstElementFile (char *fileName)
 int main ()
 {
     srand(time(NULL));
-    int range = 3;
     int numberWays = 3;
-    randomFile("randomNumbers.txt", 16);
-    createWays(range, numberWays, "testFile.txt");
-    kWays(numberWays);
+    char* fileName = "randomNumbers.txt";
+
+    randomFile("randomNumbers.txt", 22);
+    createWays(numberWays, fileName);
+    kWays(numberWays, fileName);
 
     return 1;
 }
