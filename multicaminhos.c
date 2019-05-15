@@ -22,7 +22,7 @@ int getLesserValue (int *array, int size);
 void initializeBuffer (int *buffer, int numberWays);
 void createNewWay (int *buffer, char *fileName, int numberWays, int *lastWay);
 void copyFiles (char *fileName1, char *fileName2);
-void kWays (int numberWays, char *fileName);
+void kWays (int numberWays, char *fileName, int aExe);
 void removeMinus2 (char* fileName);
 void addMinus2 (char *fileName);
 
@@ -256,21 +256,54 @@ void concatFiles (char *fileName1, char *fileName2)
     fclose(f2);
 }
 
-void kWays (int numberWays, char *fileName)
+void kWays (int numberWays, char *fileName, int aExe)
 {
     int nExe = 0;
     int fileSize = sizeFile(fileName);
 
-    kWays_(numberWays);
+    for (int i = RAM; i<fileSize; i*=numberWays) nExe++;
 
     FILE *file = fopen("sortedFile.txt", "w");
+    fclose(file);
+
+    if (aExe == 0)
+        createWays(numberWays, fileName);
+    else 
+        createWays(numberWays, "sortedFile.txt");
+
+
+    kWays_(numberWays);
+
+    file = fopen("sortedFile.txt", "r+");
 
     for (int i = 0; i<numberWays; i++) {
-        char fileName[11] = {'w', 'a', 'y', '0', '0', '0', '.', 't', 'x', 't', '\0'};
-        intToChar(i, fileName);
-        concatFiles("sortedFile.txt", fileName);
-        removeMinus2("sortedFile.txt");
+        char fileNameTemp[11] = {'w', 'a', 'y', '0', '0', '0', '.', 't', 'x', 't', '\0'};
+        intToChar(i, fileNameTemp);
+        removeMinus2(fileNameTemp);
     }
+
+    int buffer[RAM];
+    FILE *fileAux = fopen ("temp.txt", "w");
+    
+    for (int j = 0; j<RAM*numberWays; j++) {
+        initializeBuffer(buffer, 3);
+
+        for (int i = 0; i<RAM; i++) {
+            fprintf(fileAux, "%d ", buffer[i]);
+            printf("%d ", buffer[i]);
+        }
+
+        printf("\n");
+    }
+
+    fclose(fileAux);
+    
+    copyFiles("sortedFile.txt", "temp.txt");
+    removeMinus2("sortedFile.txt");
+    remove("temp.txt");
+
+    aExe++;
+    //kWays(numberWays, fileName, aExe);
 }
 
 void kWays_ (int numberWays) 
@@ -290,7 +323,6 @@ void kWays_ (int numberWays)
         intToChar(numberWays+i, fileNameAux);  
         copyFiles(fileName, fileNameAux);
     }
-
 }
 
 void copyFiles (char *fileName1, char *fileName2)
@@ -391,7 +423,12 @@ void initializeBuffer (int *buffer, int numberWays)
 
         FILE *way = fopen (fileName, "r");
 
-        fscanf(way, "%d", &buffer[i]);
+        int n;
+        if (fscanf(way, "%d", &n) == 1) {
+            buffer[i] = n;
+        } else {
+            buffer[i] = -2;
+        }
 
         fclose(way);
 
@@ -457,8 +494,7 @@ int main ()
     char* fileName = "testFile.txt";
 
     randomFile("randomNumbers.txt", 22);
-    createWays(numberWays, fileName);
-    kWays(numberWays, fileName);
+    kWays(numberWays, fileName, 0);
 
     return 1;
 }
