@@ -23,6 +23,9 @@ void initializeTempWays(int numberWays);
 // Delete temp ways.
 void removeTempWays(int numberWays);
 
+// Delete sorted files.
+void removeSortedFiles(int numberWays);
+
 // Function to control all the executions needed for the kWays.
 // Step 1: Initialize all the files "wayXXX.txt" with an empty value.
 // Step 2: Call the createFirstWays, passing the fileName as the dataFile.
@@ -114,6 +117,9 @@ void sortBuffer(int *buffer);
 // Print the contents of the buffer on the terminal.
 void printBuffer(int *buffer);
 
+// Return True if all the values inside the buffer = -1. 
+int checkEmptyBuffer(int *buffer);
+
 // Concat the elements of a buffer and a file. Example:
 // fileName - wayXXX.txt
 // buffer[3] - 1 2 3
@@ -130,6 +136,9 @@ void getWayName(int index, char* wayName);
 
 // As getWayName, but it returns a "tempWayXXX.txt"
 void getTempWayName(int index, char* tempWayName);
+
+// As getWayName, but ir returns a "sortedFileXXX.txt"
+void getSortedFileName(int index, char* sortedFileName);
 
 // Transfer the N first values (where N = RAM) of a wayXXX.txt to its temporary counterpart.
 // Example:

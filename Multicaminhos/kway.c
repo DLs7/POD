@@ -74,14 +74,12 @@ void createSortedFile(int numberWays, char* fileName)
     FILE *sortedFile = fopen(fileName, "w");
     fclose(sortedFile);
 
-    int h =0;
-
     while (1) {
-        if (buffer[0] == -1 && buffer[1] == -1 && buffer[2] == -1) {
+        if (checkEmptyBuffer(buffer)) {
             break;
         }
         
-        printBuffer(buffer);
+        //printBuffer(buffer);
 
         int lesserIndex = getLesserValue(buffer);
         FILE *aux = fopen(fileName, "r+");
@@ -103,7 +101,7 @@ void createSortedFile(int numberWays, char* fileName)
         fclose(tempWay);
     }
  
-    printBuffer(buffer);
+    //printBuffer(buffer);
 }
 
 // Buffer manipulation functions
@@ -150,6 +148,17 @@ void printBuffer(int *buffer)
     }
 
     printf("\n");
+}
+
+int checkEmptyBuffer(int *buffer)
+{
+    int flag = 0;
+    for (int i = 0; i<RAM; i++) {
+        if (buffer[i] == -1) 
+            flag++;
+    }
+
+    return (flag == RAM);
 }
 
 void concatBufferFile(int *buffer, char* fileName) 
@@ -211,6 +220,15 @@ void removeTempWays(int numberWays)
     }
 }
 
+void removeSortedFiles(int numberWays)
+{
+    for (int i = 0; i<numberWays; i++) {
+        char sortedFileName[18] = {'s', 'o', 'r', 't', 'e', 'd', 'F', 'i', 'l', 'e', '0', '0', '0', '.', 't', 'x', 't', '\0'};
+        getSortedFileName(i, sortedFileName);
+        remove(sortedFileName);
+    } 
+}
+
 static void printWays(int numberWays) 
 {
     char wayName[11] = {'w', 'a', 'y', '0', '0', '0', '.', 't', 'x', 't', '\0'};
@@ -269,13 +287,73 @@ void createFirstWays(int numberWays, char* fileName)
 
 void createWays(int numberWays, char* fileName)
 {
+    if (numberWays < 1) {
+        printf("Invalid number of ways in fuction createWays. Number of ways must be a positive and bigger than 0 value.\n");
+        return;
+    } 
+
+    FILE *dataFile = fopen(fileName, "r");
+    
+    int buffer[RAM];
+
+    char wayName[11] = {'w', 'a', 'y', '0', '0', '0', '.', 't', 'x', 't', '\0'};
+    
+    int n;
+    int i = 0;
+    int aWay = 0;
+    while (fscanf(dataFile, "%d", &n) == 1) {
+        if (i == RAM) {
+            i = 0;
+
+            getWayName(aWay, wayName);
+            concatBufferFile(buffer, wayName);
+            clearBuffer(buffer);
+
+            if (aWay == numberWays-1) 
+                aWay = 0;
+            else
+                aWay++;
+
+        }
+        
+        buffer[i] = n;
+    
+        i++;
+    }
+    getWayName(aWay, wayName);
+    concatBufferFile(buffer, wayName);
+    clearBuffer(buffer);
+
+
+    fclose(dataFile);
+
+    printf("createWays:\n");
+    printWays(numberWays);
 }
+
 
 void kWays(int numberWays, char* fileName)
 {
+    char sortedFileName[18] = {'s', 'o', 'r', 't', 'e', 'd', 'F', 'i', 'l', 'e', '0', '0', '0', '.', 't', 'x', 't', '\0'};
+
     initializeWays(numberWays);
     createFirstWays(numberWays, fileName);
-    createSortedFile(numberWays, "sortedFile.txt");
+
+    for (int i = 0; i<numberWays; i++) {
+        getSortedFileName(i, sortedFileName);
+        createSortedFile(numberWays, sortedFileName);
+    }
+
+    FILE *sortedFile = fopen("sortedFile.txt", "w");
+    fclose(sortedFile);
+
+    for (int i = 0; i<numberWays; i++) {
+        getSortedFileName(i, sortedFileName);
+        concatFiles("sortedFile.txt", sortedFileName);
+    }
+
+    removeTempWays(numberWays);
+    removeSortedFiles(numberWays);    
 }
 
 void getWayName(int index, char* wayName)
@@ -332,6 +410,33 @@ void getTempWayName(int index, char* tempWayName)
     }
 }
 
+void getSortedFileName(int index, char* sortedFileName)
+{
+    char aux[4] = {'0', '0', '0', '\0'};
+
+    if (index > 999 || index < 0) {
+        printf("Index out of scope of function getWayName.\n");
+        return;
+    }
+
+    if (index < 9) {
+        aux[2] = index + 48;
+        
+    } else if (index < 99) {
+        aux[1] = ( index / 10 ) + 48;
+        aux[2] = ( index % 10 ) + 48;
+        
+    } else if (index < 999) {
+        aux[0] = ( index / 100 ) + 48;
+        aux[1] = ( ( index / 10 ) % 10 ) + 48;
+        aux[2] = ( index % 10 ) + 48;
+    }
+
+    for (int i = 0; i<3; i++) {
+        sortedFileName[10+i] = aux[i];
+    }
+}
+
 void getNFirsts(int numberWays)
 {
     for (int i = 0; i<numberWays; i++) {
@@ -359,8 +464,28 @@ void getNFirsts(int numberWays)
     }
 }
 
+// Generate a file with random numbers.
+static void randomFile (char *fileName, int size) 
+{
+    FILE *file = fopen (fileName, "w");
+
+    for (int i = 0; i<size; i++) {
+        int n = rand()%100;
+        fprintf(file, "%d ", n);
+    }
+
+    fclose(file);
+
+    return;
+}
+
 void main ()
 {
-    kWays(3, "testFile.txt");
+    srand(time(NULL));
+    randomFile("randomNumbers.txt", 22);
+
+    kWays(3, "randomNumbers.txt");
+
+
 
 }
