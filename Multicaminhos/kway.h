@@ -1,0 +1,1 @@
+void createWays(int numberWays, char* fileName);
