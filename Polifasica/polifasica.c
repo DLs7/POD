@@ -18,7 +18,7 @@ void randomFile(char * fileName, int size) {
     fclose(file);
 }
 
-int sizeFibonacci(int size) {
+int firstSizeFibonacci(int size) {
     int c = 0, next = 0, first = 0, second = 1;
     
     while(next < size) {
@@ -31,8 +31,41 @@ int sizeFibonacci(int size) {
         }
         c++;
     }
-
     return first;
+}
+
+int secondSizeFibonacci(int size) {
+    int c = 0, next = 0, first = 0, second = 1;
+    
+    while(next < size) {
+        if(c <= 1)
+            next = c;
+        else{
+            next = first + second;
+            first = second;
+            second = next;
+        }
+        c++;
+    }
+    return second;
+}
+
+int nthFibonacci(int size) {
+    int c = 0, next = 0, first = 0, second = 1;
+    
+    while(next < size) {
+        if(c <= 1)
+            next = c;
+        else{
+            next = first + second;
+            first = second;
+            second = next;
+        }
+        if(next <= size){
+            c++;
+        }
+    }
+    return c;
 }
 
 int fibonacci(int n) { 
@@ -88,11 +121,9 @@ void polyphaseMerge(int exec, int lastSize, int lastLastSize) {
             while(!feof(file2)){
                 for(int i = 0; i < lastSize; i++){
                     fscanf(file1, "%d", &buffer[i]);
-                    removeFirstElement("arq1.txt");
                 }
                 for(int i = 0; i < lastLastSize; i++){
                     fscanf(file2, "%d", &buffer[lastSize + i]);
-                    removeFirstElement("arq2.txt");
                 }
                 
                 if(!feof(file2)){
@@ -105,9 +136,17 @@ void polyphaseMerge(int exec, int lastSize, int lastLastSize) {
                 }
             }
 
+            for (int i = 0; i < fibonacci(nthFibonacci(SIZE) - exec) * lastSize; i++){
+                removeFirstElement("arq1.txt");
+                removeFirstElement("arq2.txt");
+            }
+
             fclose(file0);
             fclose(file1);
             fclose(file2);
+
+            system("pause");
+            system("cls");
 
         //arq 2
         } else if (exec % 3 == 1) {
@@ -118,11 +157,11 @@ void polyphaseMerge(int exec, int lastSize, int lastLastSize) {
             while(!feof(file1)){
                 for(int i = 0; i < lastSize; i++){
                     fscanf(file0, "%d", &buffer[i]);
-                    removeFirstElement("arq0.txt");
+                    //removeFirstElement("arq0.txt");
                 }
                 for(int i = 0; i < lastLastSize; i++){
                     fscanf(file1, "%d", &buffer[lastSize + i]);
-                    removeFirstElement("arq1.txt");
+                    //removeFirstElement("arq1.txt");
                 }
                 if(!feof(file1)){
                     quick_sort(buffer, blockSize);
@@ -134,9 +173,17 @@ void polyphaseMerge(int exec, int lastSize, int lastLastSize) {
                 }
             }
 
+            for (int i = 0; i <  fibonacci(nthFibonacci(SIZE) - exec) * lastSize; i++){
+                removeFirstElement("arq0.txt");
+                removeFirstElement("arq1.txt");
+            }
+
             fclose(file0);
             fclose(file1);
             fclose(file2);
+
+            system("pause");
+            system("cls");
         
         //arq 1
         } else if (exec % 3 == 2) {
@@ -147,11 +194,11 @@ void polyphaseMerge(int exec, int lastSize, int lastLastSize) {
             while(!feof(file0)){
                 for(int i = 0; i < lastSize; i++){
                     fscanf(file2, "%d", &buffer[i]);
-                    removeFirstElement("arq2.txt");
+                    //removeFirstElement("arq2.txt");
                 }
                 for(int i = 0; i < lastLastSize; i++){
                     fscanf(file0, "%d", &buffer[lastSize + i]);
-                    removeFirstElement("arq0.txt");
+                    //removeFirstElement("arq0.txt");
                 }
                 if(!feof(file0)){
                     quick_sort(buffer, blockSize);
@@ -163,9 +210,18 @@ void polyphaseMerge(int exec, int lastSize, int lastLastSize) {
                 }
             }
 
+            for (int i = 0; i < fibonacci(nthFibonacci(SIZE) - exec) * lastSize; i++){
+                removeFirstElement("arq2.txt");
+                removeFirstElement("arq0.txt");
+            }
+
+
             fclose(file0);
             fclose(file1);
             fclose(file2);
+
+            system("pause");
+            system("cls");
 
         }
 
@@ -203,10 +259,12 @@ int main() {
     
     for(int i = 0; i < 2; i++){
         if(i == 0)
-            separation[i] = sizeFibonacci(SIZE);
+            separation[i] = firstSizeFibonacci(SIZE);
         else
             separation[i] = SIZE - separation[i - 1];
     }
+
+    int offset = secondSizeFibonacci(SIZE) - separation[1];
 
     printf("\n\nSeparation: %d %d\n\n", separation[0], separation[1]);
 
