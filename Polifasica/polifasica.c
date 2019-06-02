@@ -9,8 +9,9 @@
 #define SIZE 31
 
 void systemCall(){
-    system("pause");
-    system("cls");
+    printf("Pressione qualquer tecla para continuar...");
+    getchar();
+    system("clear");
 }
 
 void randomFile(char * fileName, int size, int offset) {
@@ -308,7 +309,7 @@ void startPolyphase(char * fileName, int * separation, int offset) {
 
 int main() {
     srand(time(NULL));
-    system("cls");
+    system("clear");
 
     int * separation = (int*)malloc(sizeof(int) * 2);
     for(int i = 0; i < 2; i++){
