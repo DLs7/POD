@@ -236,7 +236,7 @@ int polyphaseMerge(int exec, int lastSize, int lastLastSize, int offset) {
             systemCall();
 
         }
-
+        free(buffer);
         return polyphaseMerge(exec + 1, blockSize, lastSize, offset);
     }
     return exec - 1;
@@ -323,4 +323,6 @@ int main() {
     
     randomFile(INPUT, SIZE, offset);
     startPolyphase(INPUT, separation, offset);
+
+    free(separation);
 }
