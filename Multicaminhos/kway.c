@@ -62,51 +62,93 @@ void printFile(char* fileName)
     printf("\n");
 }
 
+void initializeSortedFiles(int numberWays)
+{
+    char sortedFileName[18] = {'s', 'o', 'r', 't', 'e', 'd', 'F', 'i', 'l', 'e', '0', '0', '0', '.', 't', 'x', 't', '\0'};
+    for (int i = 0; i<numberWays; i++) {
+        getSortedFileName(i, sortedFileName);
+        FILE *sortedFile = fopen(sortedFileName, "w");
+        fclose(sortedFile);
+    }
+}
+
 void createSortedFile(int numberWays, char* fileName)
 {
-    initializeTempWays(numberWays);
-    getNFirsts(numberWays);
+    normalizeWays(numberWays);
+
+    printf("\n\n\n");
+    printWays(numberWays);
+    printf("\n\n");
 
     int buffer[RAM];
-    clearBuffer(buffer);
-    initializeBuffer(buffer);
-    
-    FILE *sortedFile = fopen(fileName, "w");
-    fclose(sortedFile);
+    initializeSortedFiles(numberWays);
 
-    while (1) {
-        if (checkEmptyBuffer(buffer)) {
-            break;
+    for (int k = 0; k<numberWays; k++) {
+        getNFirsts(numberWays);
+        initializeBuffer(buffer);
+
+        while (1) {
+            char sortedFileName[18] = {'s', 'o', 'r', 't', 'e', 'd', 'F', 'i', 'l', 'e', '0', '0', '0', '.', 't', 'x', 't', '\0'};
+            getSortedFileName(k, sortedFileName);
+            FILE *sortedFile = fopen(sortedFileName, "r+");
+            fseek(sortedFile, 0, SEEK_END);
+
+            int lesserIndex = getLesserValue(buffer);
+            int lesserValue = buffer[lesserIndex];
+            printf("lesserIndex = %d, value = %d\n", lesserIndex, lesserValue);
+            fprintf(sortedFile, "%d ", lesserValue);
+
+            fclose(sortedFile);
+
+            char tempWayName[15] = {'t', 'e', 'm', 'p', 'W', 'a', 'y', '0', '0', '0', '.', 't', 'x', 't', '\0'};
+            getTempWayName(lesserIndex, tempWayName);
+            FILE *tempWay = fopen(tempWayName, "r");
+            int n;
+            buffer[lesserIndex] = -1;
+            if (fscanf(tempWay, "%d", &n) == 1) {
+                buffer[lesserIndex] = n;
+                removeFirstElement(tempWayName);
+            }
+
+            fclose(tempWay);
+
+            printBuffer(buffer);
+            printFile(sortedFileName);
+            printFile("tempWay000.txt");
+            printFile("tempWay001.txt");
+            printFile("tempWay002.txt");
+
+            printf("\n");
+
+            if (checkEmptyBuffer(buffer)) 
+                break;
         }
-        
-        //printBuffer(buffer);
-
-        int lesserIndex = getLesserValue(buffer);
-        FILE *aux = fopen(fileName, "r+");
-        fseek(aux, 0, SEEK_END);
-        fprintf(aux, "%d ", buffer[lesserIndex]);
-        fclose(aux);
-
-        buffer[lesserIndex] = -1;
-
-        char tempWayName[15] = {'t', 'e', 'm', 'p', 'W', 'a', 'y', '0', '0', '0', '.', 't', 'x', 't', '\0'};
-        getTempWayName(lesserIndex, tempWayName);
-        FILE *tempWay = fopen(tempWayName, "r");
-        int n;
-        if (fscanf(tempWay, "%d", &n) == 1) {
-            buffer[lesserIndex] = n;
-            removeFirstElement(tempWayName);
-        }
-
-        fclose(tempWay);
     }
- 
-    //printBuffer(buffer);
+    
+    for (int i = 0; i<numberWays; i++) {
+        char sortedFileName[18] = {'s', 'o', 'r', 't', 'e', 'd', 'F', 'i', 'l', 'e', '0', '0', '0', '.', 't', 'x', 't', '\0'};
+        getSortedFileName(i, sortedFileName);
+
+        char wayName[11] = {'w', 'a', 'y', '0', '0', '0', '.', 't', 'x', 't', '\0'};
+        getWayName(i, wayName);
+
+        copyFile(wayName, sortedFileName);
+    }
+
+    for (int i = 0; i<numberWays; i++) {
+        char wayName[11] = {'w', 'a', 'y', '0', '0', '0', '.', 't', 'x', 't', '\0'};
+        getWayName(i, wayName);
+        concatFiles(fileName, wayName);
+    }
+
+    printWays(numberWays);
 }
 
 // Buffer manipulation functions
 void initializeBuffer(int *buffer)
 {
+    clearBuffer(buffer);
+
     for (int i = 0; i<RAM; i++) {
         char tempWayName[15] = {'t', 'e', 'm', 'p', 'W', 'a', 'y', '0', '0', '0', '.', 't', 'x', 't', '\0'};
         getTempWayName(i, tempWayName);
@@ -181,10 +223,15 @@ int getLesserValue (int *buffer)
 
     for (int i = 0; i<RAM; i++) {
         
-        if (buffer[i] != -1) {
-            if (buffer[i] < buffer[lesser])
-        	    lesser = i;
-        } 
+        if (checkEmptyBuffer(buffer))
+            break;
+
+        while (buffer[lesser] == -1 && lesser < RAM)
+            lesser++;
+
+        if (buffer[i] < buffer[lesser] && buffer[i] != -1)
+        	lesser = i;
+
     }
 
     return lesser;
@@ -229,7 +276,7 @@ void removeSortedFiles(int numberWays)
     } 
 }
 
-static void printWays(int numberWays) 
+void printWays(int numberWays) 
 {
     char wayName[11] = {'w', 'a', 'y', '0', '0', '0', '.', 't', 'x', 't', '\0'};
     for (int i = 0; i<numberWays; i++) {
@@ -260,12 +307,14 @@ void createFirstWays(int numberWays, char* fileName)
             getWayName(aWay, wayName);
             sortBuffer(buffer);
             concatBufferFile(buffer, wayName);
+            printf("--------------------\n");
+            printBuffer(buffer);
             clearBuffer(buffer);
 
             if (aWay == numberWays-1) 
                 aWay = 0;
             else
-                aWay++;
+                aWay++;                
 
         }
         
@@ -276,12 +325,14 @@ void createFirstWays(int numberWays, char* fileName)
     getWayName(aWay, wayName);
     sortBuffer(buffer);
     concatBufferFile(buffer, wayName);
+    printf("--------------------\n");
+    printBuffer(buffer);
     clearBuffer(buffer);
 
 
     fclose(dataFile);
 
-    printf("createFirstWays:\n");
+    printf("\ncreateFirstWays:\n");
     printWays(numberWays);
 }
 
@@ -331,29 +382,64 @@ void createWays(int numberWays, char* fileName)
     printWays(numberWays);
 }
 
+static void getNFirst(int* buffer, char* fileName)
+{
+    FILE *f = fopen(fileName, "r");
+    clearBuffer(buffer);
+    int n;
+
+    for (int i = 0; i<RAM; i++) {
+        fseek(f, 0, SEEK_SET);
+        if (fscanf(f, "%d", &n) == 1) {
+            removeFirstElement(fileName);
+            buffer[i] = n;
+        }
+    }
+
+    fclose(f);
+}
+
+void normalizeWays(int numberWays)
+{
+    char tempWayName[15] = {'t', 'e', 'm', 'p', 'W', 'a', 'y', '0', '0', '0', '.', 't', 'x', 't', '\0'};
+    char wayName[11] = {'w', 'a', 'y', '0', '0', '0', '.', 't', 'x', 't', '\0'};
+    
+    int buffer[RAM];
+
+    initializeTempWays(numberWays);
+
+    for (int i = 0; i<numberWays; i++) {
+        getWayName(i, wayName);
+        FILE *way = fopen(wayName, "r");
+
+        for (int j = 0; j<RAM; j++) {
+            clearBuffer(buffer);
+            getNFirst(buffer, wayName);
+            getTempWayName(j, tempWayName);
+            concatBufferFile(buffer, tempWayName);
+        }
+
+        fclose(way);
+    }
+
+    for (int i = 0; i<numberWays; i++) {
+        getWayName(i, wayName);
+        getTempWayName(i, tempWayName);
+        copyFile(wayName, tempWayName);
+    }
+}
 
 void kWays(int numberWays, char* fileName)
 {
-    char sortedFileName[18] = {'s', 'o', 'r', 't', 'e', 'd', 'F', 'i', 'l', 'e', '0', '0', '0', '.', 't', 'x', 't', '\0'};
-
     initializeWays(numberWays);
     createFirstWays(numberWays, fileName);
-
-    for (int i = 0; i<numberWays; i++) {
-        getSortedFileName(i, sortedFileName);
-        createSortedFile(numberWays, sortedFileName);
-    }
 
     FILE *sortedFile = fopen("sortedFile.txt", "w");
     fclose(sortedFile);
 
-    for (int i = 0; i<numberWays; i++) {
-        getSortedFileName(i, sortedFileName);
-        concatFiles("sortedFile.txt", sortedFileName);
-    }
+    createSortedFile(numberWays, "sortedFile.txt");
+    printFile("sortedFile.txt");
 
-    removeTempWays(numberWays);
-    removeSortedFiles(numberWays);    
 }
 
 void getWayName(int index, char* wayName)
@@ -482,10 +568,11 @@ static void randomFile (char *fileName, int size)
 void main ()
 {
     srand(time(NULL));
-    randomFile("randomNumbers.txt", 22);
+    randomFile("randomNumbers.txt", 16);
 
+    printf("aQUI FUNCIOnAAAaaaAA\n");
+    kWays(3, "testFile.txt");
+
+    printf("\n\naQUI nAoAoAOAoooAO FUNCIOnAAAaaaAA\n");
     kWays(3, "randomNumbers.txt");
-
-
-
 }

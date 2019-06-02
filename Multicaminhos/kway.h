@@ -19,6 +19,7 @@ void createWays(int numberWays, char* fileName);
 // Initialize ways and temp ways with empty values.
 void initializeWays(int numberWays);
 void initializeTempWays(int numberWays);
+void initializeSortedFiles(int numberWays);
 
 // Delete temp ways.
 void removeTempWays(int numberWays);
@@ -78,6 +79,10 @@ void kWays(int numberWays, char* fileName);
 // Repeat Step 5 until the buffer holds only -1 -1 -1 -1 ... RAM.
 void createSortedFile(int numberWays, char* fileName);
 
+void normalizeWays(int numberWays);
+
+void printWays(int numberWays);
+
 // Concat two files. Example:
 // file1 = 1 2 3
 // file2 = 4 5 6
@@ -102,7 +107,7 @@ void copyFile(char* file1Name, char* file2Name);
 // wayXXX.txt - 1 2 3 4 5 6
 void printFile(char* fileName);
 
-// Returns the index of the lesser value contained inside a buffer.
+// Returns the index of the lesser value contained inside a buffer, excluding -1.
 int getLesserValue(int *buffer);
 
 // Get the first elements of N tempWays, where N = RAM.

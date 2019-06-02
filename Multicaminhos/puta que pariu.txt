@@ -1,0 +1,109 @@
+1 execução:
+
+createWays
+INT ACO ADE
+CER ABL A
+AAL ACN
+
+sortedFile
+
+sortedFile000.txt
+INT 
+CER
+AAL
+
+1e - ICA // sF - 
+NT
+ER
+AL
+
+2e - ICA // sf - A
+NT
+ER
+L
+
+3e - ICL // sf - AA
+NT
+ER
+
+4e - IEL // sf - AAC
+NT
+R
+
+5e - IRL // sf - AAC E
+NT
+
+6e - NRL // sf - AAC EI
+T
+
+7e - NR  // sf - AAC EIL
+T
+
+8e - TR  // sf - AAC EIL N
+9e - T   // sf - AAC EIL NR
+10e-     // sf - AAC EIL NRT = sortedFile000.txt
+
+sortedFile001.txt
+ACO
+ABL
+ACN
+
+1e - AAA // sf - 
+CO
+BL
+CN
+
+2e - CAA // sf - A
+O
+BL
+CN
+
+3e - CBA // sf - AA
+O
+L
+CN
+
+4e - CBC // sf - AAA
+O
+L
+N
+
+5e - CLC // sf - AAA B
+O
+
+N
+
+6e - OLC // sf - AAA BC
+
+
+N
+
+7e - OLN // sf - AAA BCC
+8e - O N // sf - AAA BCC L
+9e - O   // sf - AAA BCC LN
+10e -    // sf - AAA BCC LNO = sortedFile001.txt
+
+sortedFile002.txt
+ADE
+A
+
+1e - AA // sf - 
+DE
+
+2e - DA // sf - A
+E
+
+3e - D // sf - AA
+E
+
+4e - E // sf - AAD
+5e -   // sf - AAD E = sortedFile002.txt 
+
+
+sortedFile = 
+AAC EIL NRT
+AAA BCC LNO
+AAD E
+
+
+
