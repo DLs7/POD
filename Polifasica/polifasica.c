@@ -1,21 +1,35 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <limits.h>
+
 #include "quicksort.h"
 
 #define INPUT "arq0.txt"
-#define SIZE 21
+#define SIZE 31
 
-void randomFile(char * fileName, int size) {
+void systemCall(){
+    system("pause");
+    system("cls");
+}
+
+void randomFile(char * fileName, int size, int offset) {
     FILE * file = fopen(fileName, "w");
 
-    for (int i = 0; i < size; i++){
-        int num = rand() % 100;
-        fprintf(file, "%d ", num);
-        printf("%d ", num);
+    for (int i = 0; i < size + offset; i++){
+        if(i < size){
+            int num = rand() % 100;
+            fprintf(file, "%d ", num);
+            printf("%d ", num);
+        } else {
+            fprintf(file, "%d ", INT_MIN);
+            printf("%d ", INT_MIN);
+        }
     }
-
     fclose(file);
+
+    printf("\n\n");
+    systemCall();
 }
 
 int firstSizeFibonacci(int size) {
@@ -47,7 +61,7 @@ int secondSizeFibonacci(int size) {
         }
         c++;
     }
-    return second;
+    return second - first;
 }
 
 int nthFibonacci(int size) {
@@ -61,9 +75,7 @@ int nthFibonacci(int size) {
             first = second;
             second = next;
         }
-        if(next <= size){
-            c++;
-        }
+        c++;
     }
     return c;
 }
@@ -103,12 +115,11 @@ void removeFirstElement(char *fileName)
     remove("temp.txt");
 }
 
-void polyphaseMerge(int exec, int lastSize, int lastLastSize) {
-    int blockSize = lastSize + lastLastSize;
-    
-    if(SIZE >= blockSize){
+int polyphaseMerge(int exec, int lastSize, int lastLastSize, int offset) {
+    int blockSize = fibonacci(exec);
 
-        printf("\n\n\nBlocksize: %d\nLast blocksize: %d\nLast last blocksize: %d\n", blockSize, lastSize, lastLastSize);
+    if(SIZE + offset >= blockSize){
+        printf("Blocksize: %d\nLast blocksize: %d\nLast last blocksize: %d\n", blockSize, lastSize, lastLastSize);
 
         int * buffer = (int*)malloc(sizeof(int) * blockSize);
 
@@ -136,7 +147,8 @@ void polyphaseMerge(int exec, int lastSize, int lastLastSize) {
                 }
             }
 
-            for (int i = 0; i < fibonacci(nthFibonacci(SIZE) - exec) * lastSize; i++){
+            printf("\n\nRemovendo %d numeros\n\n", (fibonacci(nthFibonacci(SIZE + offset) - exec) * lastSize));
+            for (int i = 0; i < (fibonacci(nthFibonacci(SIZE + offset) - exec) * lastSize); i++){
                 removeFirstElement("arq1.txt");
                 removeFirstElement("arq2.txt");
             }
@@ -145,8 +157,7 @@ void polyphaseMerge(int exec, int lastSize, int lastLastSize) {
             fclose(file1);
             fclose(file2);
 
-            system("pause");
-            system("cls");
+            systemCall();
 
         //arq 2
         } else if (exec % 3 == 1) {
@@ -173,7 +184,8 @@ void polyphaseMerge(int exec, int lastSize, int lastLastSize) {
                 }
             }
 
-            for (int i = 0; i <  fibonacci(nthFibonacci(SIZE) - exec) * lastSize; i++){
+            printf("\n\nRemovendo %d numeros\n\n", (fibonacci(nthFibonacci(SIZE + offset) - exec) * lastSize));
+            for (int i = 0; i < (fibonacci(nthFibonacci(SIZE + offset) - exec) * lastSize); i++){
                 removeFirstElement("arq0.txt");
                 removeFirstElement("arq1.txt");
             }
@@ -182,8 +194,7 @@ void polyphaseMerge(int exec, int lastSize, int lastLastSize) {
             fclose(file1);
             fclose(file2);
 
-            system("pause");
-            system("cls");
+            systemCall();
         
         //arq 1
         } else if (exec % 3 == 2) {
@@ -210,7 +221,8 @@ void polyphaseMerge(int exec, int lastSize, int lastLastSize) {
                 }
             }
 
-            for (int i = 0; i < fibonacci(nthFibonacci(SIZE) - exec) * lastSize; i++){
+            printf("\n\nRemovendo %d numeros\n\n", (fibonacci(nthFibonacci(SIZE + offset) - exec) * lastSize));
+            for (int i = 0; i < (fibonacci(nthFibonacci(SIZE + offset) - exec) * lastSize); i++){
                 removeFirstElement("arq2.txt");
                 removeFirstElement("arq0.txt");
             }
@@ -220,16 +232,26 @@ void polyphaseMerge(int exec, int lastSize, int lastLastSize) {
             fclose(file1);
             fclose(file2);
 
-            system("pause");
-            system("cls");
+            systemCall();
 
         }
 
-        polyphaseMerge(exec + 1, blockSize, lastSize);
+        return polyphaseMerge(exec + 1, blockSize, lastSize, offset);
     }
+    return exec - 1;
 }
 
-void startPolyphase(char * fileName, int * separation) {
+void printFile(char * fileName) {
+    FILE *file = fopen(fileName, "r");
+    int n;
+    printf("%s - ", fileName);
+    while (fscanf(file, "%d", &n) == 1) 
+        printf("%d ", n);
+    
+    printf("\n");
+}
+
+void startPolyphase(char * fileName, int * separation, int offset) {
     FILE * file0 = fopen("arq0.txt", "r");
     FILE * file1 = fopen("arq1.txt", "w");
     FILE * file2 = fopen("arq2.txt", "w");
@@ -248,15 +270,47 @@ void startPolyphase(char * fileName, int * separation) {
     fclose(file1);
     fclose(file2);
 
-    polyphaseMerge(3, 1, 1);
+    printFile("arq1.txt");
+    printFile("arq2.txt");
+
+    printf("\n");
+    systemCall();
+
+    int exec = polyphaseMerge(3, 1, 1, offset);
+
+    printf("Final execution: %d\n\n", exec);
+
+    if(exec % 3 == 0){
+        for(int i = 0; i < offset; i++){
+            removeFirstElement("arq0.txt");
+        }
+        printf("RESULTADO FINAL:\n");
+        printFile("arq0.txt");
+
+    } else if(exec % 3 == 1){
+        for(int i = 0; i < offset; i++){
+            removeFirstElement("arq2.txt");
+        }
+        printf("RESULTADO FINAL:\n");
+        printFile("arq2.txt");
+
+    } else if(exec % 3 == 2){
+        for(int i = 0; i < offset; i++){
+            removeFirstElement("arq1.txt");
+        }
+        printf("RESULTADO FINAL:\n");
+        printFile("arq1.txt");
+    }
+    printf("\n");
+
+    systemCall();
 }
 
 int main() {
     srand(time(NULL));
-    randomFile(INPUT, SIZE);
+    system("cls");
 
     int * separation = (int*)malloc(sizeof(int) * 2);
-    
     for(int i = 0; i < 2; i++){
         if(i == 0)
             separation[i] = firstSizeFibonacci(SIZE);
@@ -265,8 +319,7 @@ int main() {
     }
 
     int offset = secondSizeFibonacci(SIZE) - separation[1];
-
-    printf("\n\nSeparation: %d %d\n\n", separation[0], separation[1]);
-
-    startPolyphase(INPUT, separation);
+    
+    randomFile(INPUT, SIZE, offset);
+    startPolyphase(INPUT, separation, offset);
 }
