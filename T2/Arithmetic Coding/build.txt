@@ -1,0 +1,9 @@
+For the compressor:
+
+g++ -I headers/ classes/compressor.cpp -o compressor
+
+For the decompressor:
+
+g++ -I headers/ classes/decompressor.cpp -o decompressor
+
+ 

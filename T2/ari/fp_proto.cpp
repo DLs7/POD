@@ -85,8 +85,8 @@ std::string decompress(double message)
 
 int main(int, char **)
 {
-  double val = compress("WXYZ");
-  //double val = compress("abcdWXYZ"); //this will be more interesting
+  //double val = compress("WXYZ");
+  double val = compress("abcdWXYZ"); //this will be more interesting
   std::cout << "Compressed value: " 
             << std::setprecision(15)
             << val << "\n";
