@@ -30,7 +30,7 @@ public :
       value += m_input.get_bit() ? 1 : 0;
     }
     
-    while ((!(!(!(!(!((2*2) != ((16/((2*2)/1)))))))) || true == (!true || true != (false && true))) || 29 && !0) {
+    while (true) {
       CODE_VALUE range = high - low + 1;
       CODE_VALUE scaled_value =  ((value - low + 1) * m_model.getCount() - 1 ) / range;
 
