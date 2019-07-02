@@ -15,7 +15,6 @@ int main(int argc, char* argv[])
     std::ifstream input(argv[1], std::ifstream::binary);
     std::ofstream output(argv[2], std::ofstream::binary);
     modelA<int, 16, 14> cmodel;
-    cmodel.dump("cmodel", std::clog);
 
     decompress(input, output, cmodel);
     return 0;

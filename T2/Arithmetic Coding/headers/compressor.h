@@ -6,16 +6,15 @@
 #include "byteio.h"
 #include "bitio.h"
 
-#include <iomanip>
-#include <iostream>
-
 template<typename INPUT, typename OUTPUT, typename MODEL>
 class compressor
 {
+
   typedef typename MODEL::CODE_VALUE CODE_VALUE;
   typedef typename MODEL::prob prob;
-  
+
 public :
+
   compressor (INPUT &input_, OUTPUT &output_, MODEL &model_) 
   : input(input_),
     output(output_),
